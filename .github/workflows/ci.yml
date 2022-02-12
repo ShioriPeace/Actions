@@ -5,15 +5,6 @@ jobs:
   unit-test:
     name: Unit Test
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:12.1
-        env:
-          POSTGRES_USER: pguser
-          POSTGRES_PASSWORD: password
-        ports:
-         - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: Checkout
         uses: actions/checkout@v2.0.0
@@ -21,6 +12,17 @@ jobs:
         uses: actions/setup-node@v2.5.1
         with:
           node-version: ${{ matrix.node }}
+      - name: GET NPM chache directory
+        id: npm-cache
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+      - name: Cache NPM
+        uses: actions/cache@v2.0.0
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}--node-${{ hastFiles('**/package-lock.json') }}
+          restore-keys: |
+            $${{ runner.os }}--node-
       - name: Install dependencies
         run: npm ci
       - name: Test
