@@ -5,13 +5,15 @@ jobs:
   unit-test:
     name: Unit Test
     runs-on: ubuntu-latest
-    container:
-      image: node:12.14.1-stretch
-      env:
-        NODE_ENV: development
-      ports:
-        - 8080
-      options: --cpus 1
+    services:
+      postgres:
+        image: postgres:12.1
+        env:
+          POSTGRES_USER: pguser
+          POSTGRES_PASSWORD: password
+        ports:
+         - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeouts 5s --health-retries 5
     steps:
       - name: Checkout
         uses: actions/checkout@v2.0.0
